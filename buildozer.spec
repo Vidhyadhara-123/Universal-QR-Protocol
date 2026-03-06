@@ -9,11 +9,11 @@ version = 1.0
 # --- Simplified & Robust Requirements ---
 requirements = python3,kivy,qrcode,pillow
 
-# --- Android Targeting (Optimized for Android 12/13) ---
-android.api = 33
-android.minapi = 21
-android.ndk = 25b
-android.ndk_api = 21
+# --- Android Targeting (Upgraded for Android 16) ---
+android.api = 36
+android.minapi = 24
+android.sdk = 36
+android.ndk = 26b
 android.accept_sdk_license = True
 android.archs = arm64-v8a, armeabi-v7a
 
