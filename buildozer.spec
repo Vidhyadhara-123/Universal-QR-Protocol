@@ -9,11 +9,9 @@ version = 1.0
 # --- Simplified & Robust Requirements ---
 requirements = python3,kivy,qrcode,pillow
 
-# --- Android Targeting (Upgraded for Android 16) ---
-android.api = 36
+# --- Android Targeting (Modern & Stable) ---
+android.api = 35
 android.minapi = 24
-android.sdk = 36
-android.ndk = 26b
 android.accept_sdk_license = True
 android.archs = arm64-v8a, armeabi-v7a
 
@@ -29,8 +27,5 @@ android.allow_backup = True
 android.debug_artifacts = False
 
 [buildozer]
-# (str) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 2
-
-# (int) Display warning if buildozer is run as root (0 = off, 1 = on)
 warn_on_root = 1
