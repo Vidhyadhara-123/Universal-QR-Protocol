@@ -26,5 +26,11 @@ android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 # --- Stable Build Options ---
 p4a.branch = master
 android.allow_backup = True
-# Skip some debug artifacts to speed up build
 android.debug_artifacts = False
+
+[buildozer]
+# (str) Log level (0 = error only, 1 = info, 2 = debug (with command output))
+log_level = 2
+
+# (int) Display warning if buildozer is run as root (0 = off, 1 = on)
+warn_on_root = 1
