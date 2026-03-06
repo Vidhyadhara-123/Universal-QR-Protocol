@@ -5,18 +5,25 @@ package.domain = org.starkindustries
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 1.0
-requirements = python3,kivy,qrcode,pillow
+
+# --- Corrected Requirements ---
+requirements = python3,kivy==2.3.0,qrcode,pillow,hostpython3,sdl2,sdl2_image,sdl2_ttf,sdl2_mixer
 
 # --- Android Targeting (Android 12/13+) ---
 android.api = 33
 android.minapi = 21
 android.sdk = 33
 android.ndk = 25b
-android.ndk_path = 
-android.sdk_path = 
+android.accept_sdk_license = True
+android.archs = arm64-v8a, armeabi-v7a
 
 orientation = portrait
 fullscreen = 0
-android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
-android.accept_sdk_license = True
-android.archs = arm64-v8a, armeabi-v7a
+
+# --- Android Permissions ---
+android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE
+
+# --- Build Options ---
+p4a.branch = master
+android.allow_backup = True
+# android.debug_artifacts = False
