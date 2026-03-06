@@ -8,39 +8,35 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
-from kivy.core.image import Image as CoreImage
+from kivy.clock import Clock
 import qrcode
-from io import BytesIO
 import os
 
-# J.A.R.V.I.S. Theme Colors
-BG_COLOR = get_color_from_hex('#050510')
+# Theme
+BG_COLOR = '#050510'
 FG_COLOR = get_color_from_hex('#00f0ff')
 ACCENT_COLOR = get_color_from_hex('#00aaff')
 PANEL_COLOR = get_color_from_hex('#0a0a1a')
 
-Window.clearcolor = BG_COLOR
-
 class JarvisQRApp(App):
     def build(self):
-        self.title = "J.A.R.V.I.S. QR PROTOCOL"
-        
-        # Root Layout
-        root = BoxLayout(orientation='vertical', padding=15, spacing=10)
+        self.title = "J.A.R.V.I.S. QR"
+        # Root
+        root = BoxLayout(orientation='vertical', padding=10, spacing=10)
         
         # Header
         header = Label(
-            text="[b]J.A.R.V.I.S.[/b]\n[size=14]MOBILE PROTOCOL[/size]", 
-            markup=True, font_size='22sp', color=FG_COLOR, size_hint_y=None, height='80dp'
+            text="[b]J.A.R.V.I.S.[/b]\nSTABLE_PROTO_v1.6", 
+            markup=True, font_size='20sp', color=FG_COLOR, size_hint_y=None, height='80dp'
         )
         root.add_widget(header)
 
-        # Scrollable UI
+        # Scroll
         scroll = ScrollView()
         content = BoxLayout(orientation='vertical', size_hint_y=None, spacing=15, padding=10)
         content.bind(minimum_height=content.setter('height'))
 
-        # Protocol Type
+        # UI Elements
         content.add_widget(Label(text="PROTOCOL TYPE", font_size='12sp', color=ACCENT_COLOR, size_hint_y=None, height='20dp'))
         self.spinner = Spinner(
             text='Website URL', values=('Website URL', 'Text', 'WiFi', 'Email', 'vCard'),
@@ -49,92 +45,72 @@ class JarvisQRApp(App):
         self.spinner.bind(text=self.on_type_change)
         content.add_widget(self.spinner)
 
-        # Input Area
         content.add_widget(Label(text="DATA STREAM", font_size='12sp', color=ACCENT_COLOR, size_hint_y=None, height='20dp'))
         self.input_field = TextInput(
-            text="https://", multiline=True, size_hint_y=None, height='120dp',
+            text="https://", multiline=True, size_hint_y=None, height='100dp',
             background_color=PANEL_COLOR, foreground_color=FG_COLOR, cursor_color=FG_COLOR
         )
         content.add_widget(self.input_field)
 
-        # Preview Area
         content.add_widget(Label(text="ARTIFACT PREVIEW", font_size='12sp', color=ACCENT_COLOR, size_hint_y=None, height='20dp'))
-        self.qr_image = Image(size_hint_y=None, height='300dp')
+        self.qr_image = Image(size_hint_y=None, height='300dp', allow_stretch=True)
         content.add_widget(self.qr_image)
 
         scroll.add_widget(content)
         root.add_widget(scroll)
 
-        # Bottom Buttons
+        # Buttons
         btn_box = BoxLayout(size_hint_y=None, height='60dp', spacing=10)
-        self.btn_gen = Button(text='INITIATE', bold=True, background_normal='', background_color=FG_COLOR, color=BG_COLOR)
-        self.btn_gen.bind(on_press=self.generate_qr)
-        self.btn_clear = Button(text='RESET', bold=True, background_normal='', background_color=PANEL_COLOR, color=FG_COLOR)
-        self.btn_clear.bind(on_press=self.reset_all)
+        btn_gen = Button(text='INITIATE', bold=True, background_normal='', background_color=FG_COLOR, color=get_color_from_hex(BG_COLOR))
+        btn_gen.bind(on_press=self.generate_qr)
+        btn_clear = Button(text='RESET', bold=True, background_normal='', background_color=PANEL_COLOR, color=FG_COLOR)
+        btn_clear.bind(on_press=self.reset_all)
         
-        btn_box.add_widget(self.btn_gen)
-        btn_box.add_widget(self.btn_clear)
+        btn_box.add_widget(btn_gen)
+        btn_box.add_widget(btn_clear)
         root.add_widget(btn_box)
 
-        self.status_label = Label(text="SYSTEM READY", font_size='10sp', color=ACCENT_COLOR, size_hint_y=None, height='20dp')
+        self.status_label = Label(text="SYSTEM STANDBY", font_size='10sp', color=ACCENT_COLOR, size_hint_y=None, height='20dp')
         root.add_widget(self.status_label)
         
         return root
 
+    def on_start(self):
+        # Set window color safely after start
+        Window.clearcolor = get_color_from_hex(BG_COLOR)
+
     def on_type_change(self, spinner, text):
         templates = {
-            "WiFi": "SSID: MyNetwork\nPassword: MyPassword\nSecurity: WPA",
-            "vCard": "Name: Tony Stark\nPhone: +1 555 123 4567\nEmail: tony@stark.com\nOrg: Stark Industries",
-            "Email": "To: recipient@example.com\nSubject: Hello\nBody: Message",
+            "WiFi": "SSID: MyNetwork\nPassword: MyPassword",
+            "vCard": "Name: Tony Stark\nPhone: +1 555 123",
+            "Email": "To: recipient@example.com",
             "Website URL": "https://"
         }
         self.input_field.text = templates.get(text, "")
 
     def generate_qr(self, instance):
-        raw_text = self.input_field.text.strip()
-        if not raw_text:
-            self.status_label.text = "ERROR: NULL INPUT"
-            return
-            
+        if not self.input_field.text.strip(): return
+        
+        # Path to temp file
+        temp_path = os.path.join(self.user_data_dir, 'temp_qr.png')
+        
         try:
-            # 1. Format Data
-            data = raw_text
-            ctype = self.spinner.text
-            if ctype in ["WiFi", "vCard", "Email"]:
-                d = {l.split(':', 1)[0].strip().lower(): l.split(':', 1)[1].strip() for l in raw_text.split('\n') if ':' in l}
-                if ctype == "WiFi": data = f"WIFI:S:{d.get('ssid','')};T:{d.get('security','WPA')};P:{d.get('password','')};;"
-                if ctype == "vCard": data = f"BEGIN:VCARD\nVERSION:3.0\nFN:{d.get('name','')}\nTEL:{d.get('phone','')}\nEMAIL:{d.get('email','')}\nORG:{d.get('org','')}\nEND:VCARD"
-                if ctype == "Email": data = f"mailto:{d.get('to','')}?subject={d.get('subject','')}&body={d.get('body','')}"
-
-            # 2. Generate Standard QR (High Stability)
-            qr = qrcode.QRCode(
-                version=1,
-                error_correction=qrcode.constants.ERROR_CORRECT_L,
-                box_size=10,
-                border=4,
-            )
-            qr.add_data(data)
-            qr.make(fit=True)
+            # Generate
+            qr = qrcode.make(self.input_field.text.strip())
+            qr.save(temp_path)
             
-            # Create standard PIL image
-            img = qr.make_image(fill_color="black", back_color="white")
+            # Update Image - Reloading the source ensures Kivy refreshes properly
+            self.qr_image.source = '' # Clear
+            self.qr_image.source = temp_path
+            self.qr_image.reload()
             
-            # 3. Convert to Kivy Texture
-            buf = BytesIO()
-            img.save(buf, format='png')
-            buf.seek(0)
-            
-            # Update UI
-            im = CoreImage(BytesIO(buf.read()), ext='png')
-            self.qr_image.texture = im.texture
-            self.status_label.text = "PROTOCOL EXECUTED"
-            
+            self.status_label.text = "ARTIFACT GENERATED"
         except Exception as e:
-            self.status_label.text = f"CRITICAL FAILURE: {str(e)[:30]}"
+            self.status_label.text = "ERROR: " + str(e)[:20]
 
     def reset_all(self, instance):
         self.input_field.text = ""
-        self.qr_image.texture = None
+        self.qr_image.source = ''
         self.status_label.text = "SYSTEM RESET"
 
 if __name__ == '__main__':
