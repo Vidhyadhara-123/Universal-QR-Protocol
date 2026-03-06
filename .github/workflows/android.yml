@@ -56,7 +56,9 @@ jobs:
 
     - name: Build with Buildozer
       run: |
-        yes | buildozer -v android debug
+        buildozer -v android debug
+      env:
+        BUILDOZER_LOG_LEVEL: 2
       continue-on-error: false
 
     - name: Upload Artifact
