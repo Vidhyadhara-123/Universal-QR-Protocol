@@ -47,7 +47,10 @@ jobs:
           pkg-config \
           autoconf \
           automake \
-          libtool
+          libtool \
+          libffi-dev \
+          libssl-dev \
+          libjpeg-dev
 
     - name: Install Python dependencies
       run: |
@@ -56,6 +59,8 @@ jobs:
 
     - name: Build with Buildozer
       run: |
+        # Clear cache to ensure a fresh build
+        rm -rf .buildozer
         buildozer -v android debug
       env:
         BUILDOZER_LOG_LEVEL: 2
@@ -64,5 +69,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Universal_QR_Protocol_v1.5
+        name: Universal_QR_Protocol_v1.5_PRO
         path: bin/*.apk

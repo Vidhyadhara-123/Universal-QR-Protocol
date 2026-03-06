@@ -6,8 +6,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 1.0
 
-# --- Corrected Requirements ---
-requirements = python3,kivy==2.3.0,qrcode,pillow,hostpython3,sdl2,sdl2_image,sdl2_ttf,sdl2_mixer
+# --- Advanced Requirements ---
+requirements = python3,kivy==2.3.0,qrcode,pillow,hostpython3,sdl2,sdl2_image,sdl2_ttf,sdl2_mixer,pythonforandroid
 
 # --- Android Targeting (Android 12/13+) ---
 android.api = 33
@@ -21,9 +21,10 @@ orientation = portrait
 fullscreen = 0
 
 # --- Android Permissions ---
-android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE
+android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 
 # --- Build Options ---
 p4a.branch = master
 android.allow_backup = True
-# android.debug_artifacts = False
+# Use a custom NDK API level if needed
+android.ndk_api = 21
